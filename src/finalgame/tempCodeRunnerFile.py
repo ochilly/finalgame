@@ -1,1 +1,0 @@
-[value for value in iterable]

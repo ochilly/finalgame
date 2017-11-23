@@ -1,10 +1,16 @@
 """Items and Inventory for 'holding'/tracking Items"""
+
 from collections import defaultdict
 
 
 class Item(object):
 
-    """Base Class for all items"""
+    """Base class for all Items.
+    :param str name: Name of Item as seen by a player.
+    :param str description: Flavor text to be seen by a player.
+    :param int value: The value in currency.
+
+    """
 
     def __init__(self, name, description, value=0):
         self.name = name
@@ -39,14 +45,18 @@ class Item(object):
 
 class Inventory(object):
 
-    """manages Items as a defaultdict"""
+    """
+    Manages Items as a defaultdict(list, type(Item): Item).
+    defaults to 5 slots total space
+    optionally pass in items during construction
+    """
 
-    def __init__(self, space_total=5, *initial_items):
+    def __init__(self, slots=5, *initial_items):
         # TODO: what if user tries Inventory(Item1,Item2)???
         self._contents = defaultdict(list)
+        self.space_total = self.space_free = slots
         self.space_used = 0
-        self.space_total = space_total
-        self.space_free = self.space_total - self.space_used
+        self._currency = 0
         for item in initial_items:
             self.store(item)
 
@@ -54,7 +64,8 @@ class Inventory(object):
         return '{}({}, {})'.format(
             self.__class__.__name__,
             self.space_total,
-            ''.join([repr(item) + ', ' for item in self.contents()]).rstrip(', ')
+            ''.join([repr(item) + ', 'for item in self.contents()]
+                    ).rstrip(', ')
         )
 
     def __str__(self):

@@ -1,3 +1,5 @@
 # py-textadv-lpthw
 
-major work in progress
+Major work in progress.
+
+Not currently playable.

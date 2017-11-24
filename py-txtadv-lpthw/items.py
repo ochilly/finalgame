@@ -92,14 +92,12 @@ class Inventory(object):
 
         """
         if category is not None:
-            return [item
-                    for item in self._contents[category.capitalize()]
-                    ]
+            key = category.capitalize()
+            return [value for value in self._contents[key]]
         else:
-            return [item
-                    for item_list in self._contents.values()
-                    for item in item_list
-                    ]      # noice!
+            return [value
+                    for values_by_type in self._contents.values()
+                    for value in values_by_type]
 
     def is_full(self):
         """Return True if Inventory is full."""
@@ -133,8 +131,8 @@ class Inventory(object):
     def drop(self, *items):
         """Remove any amount of Items from inventory."""
         for item in items:
-            if item in self._contents[type(item)]:
-                self._contents[type(item)].remove(item)
+            if item in self._contents[item.__class__.__name__]:
+                self._contents[item.__class__.__name__].remove(item)
                 self.space_used -= 1
                 self.space_free += 1
 
@@ -183,7 +181,7 @@ class Gold(Item):
 
 if __name__ == '__main__':
     def main():
-        weapon1 = Weapon("weapon01", "super shiny thang", 12_000, 100)
+        weapon1 = Weapon("Ass BlasTer 9000", "super shiny thang", 12_000, 100)
         gold_key = Item(name="Gold Key", description="A Lustrous Key to somewhere", value=0)
         silver_key = Item("Silver Key", "A Shiny Key", 0)
         gold1 = Gold()
@@ -224,7 +222,18 @@ if __name__ == '__main__':
         print(f"backpack_repr:\t__hash__ = {hash(backpack_repr)}")
         print("\nbackpack == backpack_repr:", backpack == backpack_repr)
 
-        print(f"{backpack_repr.contents()}")
-        print(f"{backpack_repr.contents('WEApOn')}")
+        print(f"\n{backpack_repr.contents()}")
+        print(f"\n{backpack_repr.contents('WEApOn')}")
+
+        item_pane_width = 24
+        print('\n+{}+\n| {:^22} |\n|{:^22}|\n| {:22} |\n| Value:{:>16} |\n| Damage:{:>15} |\n+{}+'.format(
+            ''.join(['-' * item_pane_width]),
+            weapon1.name,
+            '-' * item_pane_width,
+            ''.join(['\"', "super shiny thing", '\"']),
+            weapon1.value,
+            weapon1.damage,
+            ''.join(['-' * item_pane_width])
+        ))
 
     main()

@@ -38,7 +38,7 @@ class Item(object):
         return hash(self.__repr__())
 
     def __eq__(self, other):
-        if isinstance(other, type(self)):
+        if isinstance(other, Item):
             return hash(self) == hash(other)
         else:
             return False
@@ -55,10 +55,10 @@ class Inventory(object):
 
     def __init__(self, slots=5, *initial_items):
         # TODO: what if user tries Inventory(Item1,Item2)???
-        self._contents = defaultdict(list)
         self.space_total = self.space_free = slots
         self.space_used = 0
         self._currency = 0
+        self._contents = defaultdict(list)
         for item in initial_items:
             self.store(item)
 
@@ -77,7 +77,7 @@ class Inventory(object):
         return hash(self.__repr__())
 
     def __eq__(self, other):
-        if isinstance(other, type(self)):
+        if isinstance(other, Inventory):
             return hash(self) == hash(other)
         else:
             return False
@@ -86,15 +86,20 @@ class Inventory(object):
         return self.space_used
 
     def contents(self, category=None):
-        """Return all items as a single list
-        :param str category: default None, return items of a specific category,
-            or all items if param=None.
+        """Return Items of a specific type as a list. Defaults to a complete list.
+        :param str category: (default=None) a specific type
+        :return list:
 
         """
-        # TODO: implement return specific categories
-        return [item
-                for item_list in iter(self._contents.values())
-                for item in item_list]      # noice!
+        if category is not None:
+            return [item
+                    for item in self._contents[category.capitalize()]
+                    ]
+        else:
+            return [item
+                    for item_list in self._contents.values()
+                    for item in item_list
+                    ]      # noice!
 
     def is_full(self):
         """Return True if Inventory is full."""
@@ -119,7 +124,7 @@ class Inventory(object):
         # TODO: Better error handling for full inventory
         for item in items:
             if not self.is_full():
-                self._contents[type(item)].append(item)
+                self._contents[item.__class__.__name__].append(item)
                 self.space_used += 1
                 self.space_free -= 1
             else:
@@ -145,6 +150,15 @@ class Weapon(Item):
 
     def __str__(self):
         return ''.join([super().__str__(), f"Damage:\t{self.damage}\n"])
+
+    def __hash__(self):
+        return hash(self.__repr__())
+
+    def __eq__(self, other):
+        if isinstance(other, Weapon):
+            return hash(self) == hash(other)
+        else:
+            return False
 
 
 class Gold(Item):
@@ -209,5 +223,8 @@ if __name__ == '__main__':
         print(f"backpack:\t__hash__ = {hash(backpack)}")
         print(f"backpack_repr:\t__hash__ = {hash(backpack_repr)}")
         print("\nbackpack == backpack_repr:", backpack == backpack_repr)
+
+        print(f"{backpack_repr.contents()}")
+        print(f"{backpack_repr.contents('WEApOn')}")
 
     main()

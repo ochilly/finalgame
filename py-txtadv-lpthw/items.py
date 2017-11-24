@@ -5,14 +5,15 @@ from collections import defaultdict
 
 class Item(object):
 
-    """Base class for all Items.
-    :param str name: Name of Item as seen by a player.
-    :param str description: Flavor text to be seen by a player.
-    :param int value: The value in currency.
-
-    """
+    """Base class for all Items."""
 
     def __init__(self, name, description, value=0):
+        """
+        :param str name: Item name seen by a player.
+        :param str description: 'Flavor' text seen by a player.
+        :param int value: The value in currency.
+
+        """
         self.name = name
         self.description = description
         self.value = int(value)
@@ -47,8 +48,9 @@ class Inventory(object):
 
     """
     Manages Items as a defaultdict(list, type(Item): Item).
-    defaults to 5 slots total space
-    optionally pass in items during construction
+    Defaults to 5 slots total space
+    Optionally, pass in items during construction
+
     """
 
     def __init__(self, slots=5, *initial_items):
@@ -83,33 +85,37 @@ class Inventory(object):
     def __len__(self):
         return self.space_used
 
-    def contents(self):
-        """returns all items as a single list"""
-        # inv_contents = []
-        # for item_list in iter(self._contents.values()):
-        #     for item in item_list:
-        #         inv_contents.append(item)
-        # return inv_contents
+    def contents(self, category=None):
+        """Return all items as a single list
+        :param str category: default None, return items of a specific category,
+            or all items if param=None.
+
+        """
+        # TODO: implement return specific categories
         return [item
                 for item_list in iter(self._contents.values())
                 for item in item_list]      # noice!
 
     def is_full(self):
+        """Return True if Inventory is full."""
         return self.space_used >= self.space_total
 
     def expand(self, amount_to_expand=1):
-        """icreases the total space an Inventory can hold"""
+        """Increase total space an Inventory can hold.
+        :param amount_to_expand int: default 1
+
+        """
         self.space_total += amount_to_expand
         self.space_free += amount_to_expand
 
     def shrink(self, amount_to_shrink=1):
-        """reduces the total space an Inventory can hold"""
+        """Reduce total space an Inventory can hold."""
         # TODO: what if they now have too many items?
         self.space_total -= amount_to_shrink
         self.space_free -= amount_to_shrink
 
     def store(self, *items):
-        """accepts Item objects to Inventory"""
+        """Accept any amount of Items to Inventory."""
         # TODO: Better error handling for full inventory
         for item in items:
             if not self.is_full():
@@ -120,7 +126,7 @@ class Inventory(object):
                 print(f"Inventory full. {item.name} not stored.")
 
     def drop(self, *items):
-        """remove object from inventory"""
+        """Remove any amount of Items from inventory."""
         for item in items:
             if item in self._contents[type(item)]:
                 self._contents[type(item)].remove(item)

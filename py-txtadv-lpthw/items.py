@@ -17,6 +17,7 @@ class Item(object):
         self.name = name
         self.description = description
         self.value = int(value)
+        self.item_pane_width = 24
 
     def __repr__(self):
         return '{}(\"{}\", \"{}\", {})'.format(
@@ -27,11 +28,13 @@ class Item(object):
         )
 
     def __str__(self):
-        return '\n {}\n{}\n"{}"\nValue:\t{}\n'.format(
+        return '\n\n+{}+\n| {:^22} |\n+{:^22}+\n| {:22} |\n| Value:{:>16} |\n+{}+'.format(
+            ''.join(['-' * self.item_pane_width]),
             self.name,
-            '=' * (len(self.name) + 2),
-            self.description,
-            self.value
+            '-' * self.item_pane_width,
+            ''.join(['\"', "super shiny thing", '\"']),
+            self.value,
+            ''.join(['-' * self.item_pane_width])
         )
 
     def __hash__(self):
@@ -155,7 +158,7 @@ class Weapon(Item):
         return ''.join([super().__repr__().rstrip(')'), f", {self.damage})"])
 
     def __str__(self):
-        return ''.join([super().__str__(), f"Damage:\t{self.damage}\n"])
+        return ''.join([super().__str__(), f"\n| Damage:{self.damage:>15} |\n+{'-' * self.item_pane_width}+"])
 
     def __hash__(self):
         return hash(self.__repr__())
@@ -238,16 +241,6 @@ if __name__ == '__main__':
         print(f"\n{backpack_repr.contents()}")
         print(f"\n{backpack_repr.contents('WEApOn')}")
 
-        item_pane_width = 24
-        print('\n+{}+\n| {:^22} |\n|{:^22}|\n| {:22} |\n| Value:{:>16} |\n| Damage:{:>15} |\n+{}+'.format(
-            ''.join(['-' * item_pane_width]),
-            weapon1.name,
-            '-' * item_pane_width,
-            ''.join(['\"', "super shiny thing", '\"']),
-            weapon1.value,
-            weapon1.damage,
-            ''.join(['-' * item_pane_width])
-        ))
         print(f"{backpack_repr._currency}")
 
     main()

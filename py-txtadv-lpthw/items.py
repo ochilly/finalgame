@@ -94,11 +94,14 @@ class Inventory(object):
         """
         if category is not None:
             key = category.capitalize()
-            return [value for value in self._contents[key]]
+            return [value
+                    for value in self._contents[key]
+                    ]
         else:
             return [value
                     for values_by_type in self._contents.values()
-                    for value in values_by_type]
+                    for value in values_by_type
+                    ]
 
     def is_full(self):
         """Return True if Inventory is full."""

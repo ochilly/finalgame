@@ -17,7 +17,17 @@ class Item(object):
         self.name = name
         self.description = description
         self.value = int(value)
-        self.item_pane_width = 24
+
+    _item_pane_width = 24
+    _item_pane_divider = ''.join(['+', '-' * _item_pane_width, '+'])
+
+    @property
+    def item_pane_width(self):
+        return type(self)._item_pane_width
+
+    @property
+    def item_pane_divider(self):
+        return type(self)._item_pane_divider
 
     def __repr__(self):
         return '{}(\"{}\", \"{}\", {})'.format(
@@ -25,17 +35,17 @@ class Item(object):
             self.name,
             self.description,
             self.value
-        )
+            )
 
     def __str__(self):
-        return '\n\n+{}+\n| {:^22} |\n+{:^22}+\n| {:22} |\n| Value:{:>16} |\n+{}+'.format(
-            ''.join(['-' * self.item_pane_width]),
+        return '\n\n{}\n| {:^22} |\n{:^22}\n| {:22} |\n| Value:{:>16} |\n{}'.format(
+            self.item_pane_divider,
             self.name,
-            '-' * self.item_pane_width,
-            ''.join(['\"', "super shiny thing", '\"']),
+            self.item_pane_divider,
+            ''.join(['\"', self.description, '\"']),
             self.value,
-            ''.join(['-' * self.item_pane_width])
-        )
+            self.item_pane_divider
+            )
 
     def __hash__(self):
         return hash(self.__repr__())
@@ -72,7 +82,7 @@ class Inventory(object):
             repr(Gold(self._currency)),
             ''.join([repr(item) + ', ' for item in self.contents()]
                     ).rstrip(', ')
-        )
+            )
 
     def __str__(self):
         return ''.join([str(item) for item in self.contents()])
@@ -158,7 +168,11 @@ class Weapon(Item):
         return ''.join([super().__repr__().rstrip(')'), f", {self.damage})"])
 
     def __str__(self):
-        return ''.join([super().__str__(), f"\n| Damage:{self.damage:>15} |\n+{'-' * self.item_pane_width}+"])
+        return "{}\n| Damage: {:>14} |\n{}".format(
+                    super().__str__(),
+                    self.damage,
+                    self.item_pane_divider
+                )
 
     def __hash__(self):
         return hash(self.__repr__())

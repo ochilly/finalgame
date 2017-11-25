@@ -125,7 +125,7 @@ class Inventory(object):
         """Accept any amount of Items to Inventory."""
         # TODO: Better error handling for full inventory
         for item in items:
-            if item.__class__.__name__ is 'Gold':
+            if item.__class__.__name__ == 'Gold':
                 self._currency += item.value
             elif not self.is_full():
                 self._contents[item.__class__.__name__].append(item)

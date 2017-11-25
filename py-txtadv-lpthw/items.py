@@ -63,10 +63,11 @@ class Inventory(object):
             self.store(item)
 
     def __repr__(self):
-        return '{}({}, {})'.format(
+        return '{}({}, {}, {})'.format(
             self.__class__.__name__,
             self.space_total,
-            ''.join([repr(item) + ', 'for item in self.contents()]
+            repr(Gold(self._currency)),
+            ''.join([repr(item) + ', ' for item in self.contents()]
                     ).rstrip(', ')
         )
 
@@ -121,7 +122,9 @@ class Inventory(object):
         """Accept any amount of Items to Inventory."""
         # TODO: Better error handling for full inventory
         for item in items:
-            if not self.is_full():
+            if item.__class__.__name__ is 'Gold':
+                self._currency += item.value
+            elif not self.is_full():
                 self._contents[item.__class__.__name__].append(item)
                 self.space_used += 1
                 self.space_free -= 1
@@ -162,8 +165,13 @@ class Weapon(Item):
 class Gold(Item):
     # TODO: have all Gold items consolidate, that belongs in Inventory Class?
 
+    _name = "Gold Coins"
+
+    @property
+    def name(self):
+        return type(self)._name
+
     def __init__(self, amount_of_coins=1):
-        self.name = "Gold Coins"
         self.description = "Valuable coins, worn from handing."
         self.value = amount_of_coins
 
@@ -235,5 +243,6 @@ if __name__ == '__main__':
             weapon1.damage,
             ''.join(['-' * item_pane_width])
         ))
+        print(f"{backpack_repr._currency}")
 
     main()

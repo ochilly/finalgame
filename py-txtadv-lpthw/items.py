@@ -125,10 +125,11 @@ class Inventory(object):
         """Accept any amount of Items to Inventory."""
         # TODO: Better error handling for full inventory
         for item in items:
-            if item.__class__.__name__ == 'Gold':
+            key = item.__class__.__name__
+            if key == 'Gold':
                 self._currency += item.value
             elif not self.is_full():
-                self._contents[item.__class__.__name__].append(item)
+                self._contents[key].append(item)
                 self.space_used += 1
                 self.space_free -= 1
             else:
@@ -137,8 +138,9 @@ class Inventory(object):
     def drop(self, *items):
         """Remove any amount of Items from inventory."""
         for item in items:
-            if item in self._contents[item.__class__.__name__]:
-                self._contents[item.__class__.__name__].remove(item)
+            key = item.__class__.__name__
+            if item in self._contents[key]:
+                self._contents[key].remove(item)
                 self.space_used -= 1
                 self.space_free += 1
 

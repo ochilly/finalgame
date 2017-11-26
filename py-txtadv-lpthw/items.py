@@ -7,17 +7,6 @@ class Item(object):
 
     """Base class for all Items."""
 
-    def __init__(self, name, description, value=0):
-        """
-        :param str name: Item name seen by a player.
-        :param str description: 'Flavor' text seen by a player.
-        :param int value: The value in currency.
-
-        """
-        self.name = name
-        self.description = description
-        self.value = int(value)
-
     _item_pane_width = 24
     _item_pane_divider = ''.join(['+', '-' * _item_pane_width, '+'])
 
@@ -28,6 +17,17 @@ class Item(object):
     @property
     def item_pane_divider(self):
         return type(self)._item_pane_divider
+
+    def __init__(self, name, description, value=0):
+        """
+        :param str name: Item name seen by a player.
+        :param str description: 'Flavor' text seen by a player.
+        :param int value: The value in currency.
+
+        """
+        self.name = name
+        self.description = description
+        self.value = value
 
     def __repr__(self):
         return '{}(\"{}\", \"{}\", {})'.format(
@@ -99,22 +99,20 @@ class Inventory(object):
     def __len__(self):
         return self.space_used
 
-    def contents(self, category=None):
+    def contents(self, item_type=None):
         """Return Items of a specific type as a list. Defaults to a complete list.
         :param str category: (default=None) a specific type
         :return list:
 
         """
-        if category is not None:
-            key = category.capitalize()
+        if item_type is not None:
+            item_type = item_type.capitalize()
             return [value
-                    for value in self._contents[key]
-                    ]
+                    for value in self._contents[item_type]]
         else:
             return [value
                     for values_by_type in self._contents.values()
-                    for value in values_by_type
-                    ]
+                    for value in values_by_type]
 
     def is_full(self):
         """Return True if Inventory is full."""
@@ -138,11 +136,11 @@ class Inventory(object):
         """Accept any amount of Items to Inventory."""
         # TODO: Better error handling for full inventory
         for item in items:
-            key = item.__class__.__name__
-            if key == 'Gold':
+            item_type = item.__class__.__name__
+            if item_type == 'Gold':
                 self._currency += item.value
             elif not self.is_full():
-                self._contents[key].append(item)
+                self._contents[item_type].append(item)
                 self.space_used += 1
                 self.space_free -= 1
             else:
@@ -151,9 +149,9 @@ class Inventory(object):
     def drop(self, *items):
         """Remove any amount of Items from inventory."""
         for item in items:
-            key = item.__class__.__name__
-            if item in self._contents[key]:
-                self._contents[key].remove(item)
+            item_type = item.__class__.__name__
+            if item in self.contents(item_type):
+                self._contents[item_type].remove(item)
                 self.space_used -= 1
                 self.space_free += 1
 
@@ -185,7 +183,6 @@ class Weapon(Item):
 
 
 class Gold(Item):
-    # TODO: have all Gold items consolidate, that belongs in Inventory Class?
 
     _name = "Gold Coins"
 
@@ -209,11 +206,26 @@ class Gold(Item):
         )
 
 
+class Key(Item):
+
+    def __init__(self, name, description='Opens a lock'):
+        super().__init__(name, description)
+
+    def __str__(self):
+        return super().__str__()
+
+    def __repr__(self):
+        return '{}(\"{}\", \"{}\")'.format(
+            self.__class__.__name__,
+            self.name,
+            self.description
+            )
+
 if __name__ == '__main__':
     def main():
         weapon1 = Weapon("Ass BlasTer 9000", "super shiny thang", 12_000, 100)
-        gold_key = Item(name="Gold Key", description="A Lustrous Key to somewhere", value=0)
-        silver_key = Item("Silver Key", "A Shiny Key", 0)
+        gold_key = Key(name="Gold Key", description="A Lustrous Key to somewhere")
+        silver_key = Key("Silver Key", "A Shiny Key")
         gold1 = Gold()
         gold2 = Gold(23)
 
@@ -221,7 +233,7 @@ if __name__ == '__main__':
 
         print("### TESTING Inventory.store() and drop()\n")
         print(f"slots filled: {backpack.space_used}")
-        print(f"adding 2 items to backpack using *args")
+        print(f"adding 2 Gold items to backpack using *args")
         backpack.store(gold1, gold2)
         print(f"slots filled: {backpack.space_used}")
         print(f"adding 5 items to backpack.")

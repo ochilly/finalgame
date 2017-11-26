@@ -58,7 +58,7 @@
 *.db        binary
 *.p         binary
 *.pkl       binary
-#*.pyc       binary
+*.pyc       binary
 *.pyd       binary
 *.pyo       binary
 

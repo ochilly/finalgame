@@ -7,17 +7,6 @@ class Item(object):
 
     """Base class for all Items."""
 
-    _item_pane_width = 24
-    _item_pane_divider = ''.join(['+', '-' * _item_pane_width, '+'])
-
-    @property
-    def item_pane_width(self):
-        return type(self)._item_pane_width
-
-    @property
-    def item_pane_divider(self):
-        return type(self)._item_pane_divider
-
     def __init__(self, name, description, value=0):
         """
         :param str name: Item name seen by a player.
@@ -25,9 +14,31 @@ class Item(object):
         :param int value: The value in currency.
 
         """
-        self.name = name
-        self.description = description
-        self.value = value
+        self.name = str(name)
+        self.description = str(description)
+        self.value = int(value)
+        self._pane_width = 24
+        self._pane_divider = ''.join(['+', '-' * self._pane_width, '+'])
+
+    @property
+    def pane_width(self):
+        return self._pane_width
+
+    @pane_width.setter
+    def pane_width(self, width):
+        if width >= 0:
+            self._pane_width = width
+            self._pane_divider = ''.join(['+', '-' * width, '+'])
+        else:
+            pass
+
+    @property
+    def pane_divider(self):
+        return self._pane_divider
+
+    @pane_divider.setter
+    def pane_divider(self, text):
+        return
 
     def __repr__(self):
         return '{}(\"{}\", \"{}\", {})'.format(
@@ -38,13 +49,16 @@ class Item(object):
             )
 
     def __str__(self):
-        return '\n\n{}\n| {:^22} |\n{:^22}\n| {:22} |\n| Value:{:>16} |\n{}'.format(
-            self.item_pane_divider,
+        return '\n\n{}\n| {:^{}} |\n{}\n| {:{}} |\n| Value:{:>{}} |\n{}'.format(
+            self.pane_divider,
             self.name,
-            self.item_pane_divider,
+            self.pane_width - 2,
+            self.pane_divider,
             ''.join(['\"', self.description, '\"']),
+            self.pane_width - 2,
             self.value,
-            self.item_pane_divider
+            self.pane_width - 8,
+            self.pane_divider
             )
 
     def __hash__(self):
@@ -68,8 +82,8 @@ class Inventory(object):
 
     def __init__(self, slots=5, *initial_items):
         # TODO: what if user tries Inventory(Item1,Item2)???
-        self.space_total = self.space_free = slots
-        self.space_used = 0
+        self.capacity = self.free = slots
+        self.used = 0
         self._currency = 0
         self._contents = defaultdict(list)
         for item in initial_items:
@@ -78,7 +92,7 @@ class Inventory(object):
     def __repr__(self):
         return '{}({}, {}, {})'.format(
             self.__class__.__name__,
-            self.space_total,
+            self.capacity,
             repr(Gold(self._currency)),
             ''.join([repr(item) + ', ' for item in self.contents()]
                     ).rstrip(', ')
@@ -97,40 +111,38 @@ class Inventory(object):
             return False
 
     def __len__(self):
-        return self.space_used
+        return self.used
 
-    def contents(self, item_type=None):
-        """Return Items of a specific type as a list. Defaults to a complete list.
-        :param str category: (default=None) a specific type
-        :return list:
-
-        """
-        if item_type is not None:
-            item_type = item_type.capitalize()
-            return [value
-                    for value in self._contents[item_type]]
+    def contents(self, *types):
+        """Return Items of specific type/s or a complete list."""
+        if types:
+            return [item
+                    for item_type in types
+                    for item in self._contents[item_type.capitalize()]
+                    ]
         else:
-            return [value
-                    for values_by_type in self._contents.values()
-                    for value in values_by_type]
+            return [item
+                    for items in self._contents.values()
+                    for item in items
+                    ]
 
     def is_full(self):
         """Return True if Inventory is full."""
-        return self.space_used >= self.space_total
+        return self.used >= self.capacity
 
     def expand(self, amount_to_expand=1):
         """Increase total space an Inventory can hold.
         :param amount_to_expand int: default 1
 
         """
-        self.space_total += amount_to_expand
-        self.space_free += amount_to_expand
+        self.capacity += amount_to_expand
+        self.free += amount_to_expand
 
     def shrink(self, amount_to_shrink=1):
         """Reduce total space an Inventory can hold."""
         # TODO: what if they now have too many items?
-        self.space_total -= amount_to_shrink
-        self.space_free -= amount_to_shrink
+        self.capacity -= amount_to_shrink
+        self.free -= amount_to_shrink
 
     def store(self, *items):
         """Accept any amount of Items to Inventory."""
@@ -141,8 +153,8 @@ class Inventory(object):
                 self._currency += item.value
             elif not self.is_full():
                 self._contents[item_type].append(item)
-                self.space_used += 1
-                self.space_free -= 1
+                self.used += 1
+                self.free -= 1
             else:
                 print(f"Inventory full. {item.name} not stored.")
 
@@ -152,8 +164,8 @@ class Inventory(object):
             item_type = item.__class__.__name__
             if item in self.contents(item_type):
                 self._contents[item_type].remove(item)
-                self.space_used -= 1
-                self.space_free += 1
+                self.used -= 1
+                self.free += 1
 
 
 class Weapon(Item):
@@ -166,10 +178,11 @@ class Weapon(Item):
         return ''.join([super().__repr__().rstrip(')'), f", {self.damage})"])
 
     def __str__(self):
-        return "{}\n| Damage: {:>14} |\n{}".format(
+        return "{}\n| Damage:{:>{}} |\n{}".format(
                     super().__str__(),
                     self.damage,
-                    self.item_pane_divider
+                    self.pane_width - 9,
+                    self.pane_divider
                 )
 
     def __hash__(self):
@@ -221,52 +234,60 @@ class Key(Item):
             self.description
             )
 
+
 if __name__ == '__main__':
     def main():
         weapon1 = Weapon("Ass BlasTer 9000", "super shiny thang", 12_000, 100)
-        gold_key = Key(name="Gold Key", description="A Lustrous Key to somewhere")
+        gold_key = Key("Gold Key", "A Lustrous Key to somewhere")
         silver_key = Key("Silver Key", "A Shiny Key")
         gold1 = Gold()
         gold2 = Gold(23)
 
-        backpack = Inventory(10)
+        backpack1 = Inventory(10)
 
         print("### TESTING Inventory.store() and drop()\n")
-        print(f"slots filled: {backpack.space_used}")
-        print(f"adding 2 Gold items to backpack using *args")
-        backpack.store(gold1, gold2)
-        print(f"slots filled: {backpack.space_used}")
-        print(f"adding 5 items to backpack.")
-        backpack.store(Item("test_of_item", "this is a test", "9_000_000"))
-        backpack.store(weapon1)
-        backpack.store(Weapon("weapon2347s", "broken dagger"))
-        backpack.store(gold_key)
-        backpack.store(silver_key)
-        print(f"slots filled: {backpack.space_used}")
+        print(f"slots filled: {backpack1.used}")
+        print(f"adding 2 Gold items to backpack1 using *args")
+        backpack1.store(gold1, gold2)
+        print(f"slots filled: {backpack1.used}")
+        print(f"adding 5 items to backpack1.")
+        backpack1.store(Item("test_of_item", "this is a test", "9_000_000"))
+        backpack1.store(weapon1)
+        backpack1.store(Weapon("weapon2347s", "broken dagger"))
+        backpack1.store(gold_key)
+        backpack1.store(silver_key)
+        print(f"slots filled: {backpack1.used}")
 
         print(f"dropping Item: {gold_key.name}.")
-        backpack.drop(gold_key)
-        print(f"slots filled: {backpack.space_used}")
+        backpack1.drop(gold_key)
+        print(f"slots filled: {backpack1.used}")
 
         print("\n\n### TESTING __str__ OVERRIDE:")
-        print(backpack)
+        print(backpack1)
 
         print("\n### TESTING Item repr() and hash() OVERRIDES:\n")
         print(f"weapon1:\t__repr__ = {repr(weapon1)} __hash__ = {hash(weapon1)}")
-        weapon_repr = eval(repr(weapon1))
-        print(f"weapon_repr:\t__repr__ = {weapon_repr.__repr__()} __hash__ = {weapon_repr.__hash__()}")
-        print("\nweapon1 == weapon_repr:", weapon1 == weapon_repr)
+        weapon2 = eval(repr(weapon1))
+        print(f"weapon2:\t__repr__ = {weapon2.__repr__()} __hash__ = {weapon2.__hash__()}")
+        print("\nweapon1 == weapon2:", weapon1 == weapon2)
 
         print("\n\n### TESTING Inventory repr() and hash() OVERRIDES:\n")
-        print(repr(backpack))
-        backpack_repr = eval(repr(backpack))
-        print(f"backpack:\t__hash__ = {hash(backpack)}")
-        print(f"backpack_repr:\t__hash__ = {hash(backpack_repr)}")
-        print("\nbackpack == backpack_repr:", backpack == backpack_repr)
+        print(repr(backpack1))
+        backpack2 = eval(repr(backpack1))
+        print(f"backpack1:\t__hash__ = {hash(backpack1)}")
+        print(f"backpack2:\t__hash__ = {hash(backpack2)}")
+        print("\nbackpack1 == backpack2:", backpack1 == backpack2)
 
-        print(f"\n{backpack_repr.contents()}")
-        print(f"\n{backpack_repr.contents('WEApOn')}")
+        print(f"\n{backpack2.contents}")
+        print(f"\n{backpack2.contents('WEApOn')}")
+        print(f"\n{backpack2.contents('item', 'kEY')}")
 
-        print(f"{backpack_repr._currency}")
+        print(f"{backpack2._currency}")
+
+        print(weapon1)
+        weapon1.pane_width = 10
+        print(weapon1)
+        weapon1.pane_width = 42
+        print(weapon1)
 
     main()

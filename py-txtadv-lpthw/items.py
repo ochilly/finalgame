@@ -74,7 +74,7 @@ class Item(object):
 class Inventory(object):
 
     """
-    Manages Items as a defaultdict(list, type(Item): Item).
+    Manages Items as a defaultdict(list, Class: object).
     Defaults to 5 slots total space
     Optionally, pass in items during construction
 

@@ -1,7 +1,10 @@
 """Describes the tiles in the world space."""
 __author__ = 'Phillip Johnson'
 
-import items, enemies, actions, world
+import actions
+import enemies
+import items
+import world
 
 
 class MapTile:
@@ -109,8 +112,8 @@ class EnemyRoom(MapTile):
     def modify_player(self, the_player):
         if self.enemy.is_alive():
             the_player.health = the_player.health - self.enemy.damage
-            print("Enemy does {} damage. You have {} HP remaining.".format(
-                self.enemy.damage, the_player.health
+            print("\t{} deals {} damage to you. {} health remaining.".format(
+                self.enemy.name, self.enemy.damage, the_player.health
                 )
             )
 

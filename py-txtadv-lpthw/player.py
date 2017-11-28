@@ -1,7 +1,7 @@
 """Player with relevant attributes and possible actions"""
 
 import random
-import items
+from items import Inventory
 import world
 
 
@@ -11,7 +11,7 @@ class Player(object):
         self.health = 100
         self.victory = False
         self.location_x, self.location_y = world.starting_position
-        self.inventory = items.Inventory(slots=5)
+        self.inventory = Inventory(slots=4)
         if initial_items:
             for item in initial_items:
                 self.inventory.store(item)
@@ -52,24 +52,15 @@ class Player(object):
                 max_dmg = weapon.damage
                 best_weapon = weapon
 
-        print("You use {} against {}!".format(best_weapon.name, enemy.name))
-        enemy.hp -= best_weapon.damage
+        print("\t\tYou attack {} with the {}!".format(enemy.name, best_weapon.name))
+        enemy.health -= best_weapon.damage
         if not enemy.is_alive():
-            print("You killed {}!".format(enemy.name))
+            print(f"\t\tYou killed {enemy.name}!")
         else:
-            print("{} HP is {}.".format(enemy.name, enemy.hp))
+            print(f"\t\t{enemy.name} has {enemy.health} health.")
 
     def flee(self, tile):
         """Moves the player randomly to an adjacent tile"""
         available_moves = tile.adjacent_moves()
         r = random.randint(0, len(available_moves) - 1)
         self.do_action(available_moves[r])
-
-
-if __name__ == '__main__':
-    def main():
-        player = Player()
-        player.inventory.store(items.Gold(3))
-        print(player.inventory)
-
-    main()

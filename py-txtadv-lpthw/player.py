@@ -1,19 +1,26 @@
 """Player with relevant attributes and possible actions"""
 
+import random
 import items
 import world
 
 
 class Player(object):
 
-    def __init__(self):
-        self.inventory = items.Inventory(10, items.Gold(5))
-        self.hit_points = 100
-        self.location_x, self.location_y = world.starting_position
+    def __init__(self, *initial_items):
+        self.health = 100
         self.victory = False
+        self.location_x, self.location_y = world.starting_position
+        self.inventory = items.Inventory(slots=5)
+        if initial_items:
+            for item in initial_items:
+                self.inventory.store(item)
 
     def is_alive(self):
-        return self.hit_points > 0
+        return self.health > 0
+
+    def print_inventory(self):
+        print(self.inventory, '\n')
 
     def do_action(self, action, **kwargs):
         action_method = getattr(self, action.method.__name__)

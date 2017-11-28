@@ -17,7 +17,7 @@ class Item(object):
         self.name = str(name)
         self.description = str(description)
         self.value = int(value)
-        self._pane_width = 24
+        self._pane_width = 26
         self._pane_divider = ''.join(['+', '-' * self._pane_width, '+'])
 
     @property

@@ -1,5 +1,8 @@
 """loads in and checks world/map tiles"""
 
+import os
+
+
 _world = {}
 starting_position = (0, 0)
 
@@ -16,8 +19,10 @@ def tile_exists(x, y):
 
 def load_tiles():
     """Parses a file that describes the world space into the _world object"""
-    with open('../resources/map.txt', 'r') as f:
-        rows = f.readlines()
+    script_path = os.path.dirname(os.path.realpath(__file__))
+    # a similar alternative: import sys, script_path = sys.path[0]
+    with open(f'{script_path}/../resources/map.txt', 'r') as map_file:
+        rows = map_file.readlines()
     x_max = len(rows[0].split('\t'))
     for y in range(len(rows)):
         cols = rows[y].split('\t')

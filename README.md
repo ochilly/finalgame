@@ -2,4 +2,4 @@
 
 Major work in progress.
 
-Not currently playable.
+Playable, barebones world/map logic.

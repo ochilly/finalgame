@@ -1,5 +1,4 @@
 """Describes the tiles in the world space."""
-__author__ = 'Phillip Johnson'
 
 import actions
 import enemies

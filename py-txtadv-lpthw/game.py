@@ -1,10 +1,8 @@
-"""
-A simple text adventure designed as a learning experience for new programmers.
-"""
-__author__ = 'Phillip Johnson'
-import world
+"""A simple text adventure from a beginners template."""
+
 from player import Player
 from items import Weapon
+import world
 
 
 def play():

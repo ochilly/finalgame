@@ -1,6 +1,7 @@
 """Player with relevant attributes and possible actions"""
 
 import random
+
 from items import Inventory
 import world
 
@@ -52,7 +53,7 @@ class Player(object):
                 max_dmg = weapon.damage
                 best_weapon = weapon
 
-        print("\t\tYou attack {} with the {}!".format(enemy.name, best_weapon.name))
+        print(f"\t\tYou attack {enemy.name} with the {best_weapon.name}!")
         enemy.health -= best_weapon.damage
         if not enemy.is_alive():
             print(f"\t\tYou killed {enemy.name}!")
